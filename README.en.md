@@ -20,7 +20,6 @@ USB Keyboard  →  ESP32-S3 (USB OTG Host)  →  PS/2 bit-bang  →  3.5mm TRS j
 | 1 | Female stereo TRS 3.5mm pigtail (for soldering) | **Must be stereo** — see warning below |
 | 1 | Stereo TRS 3.5mm cable (male-to-male) | Connects the adapter to the CW Pokemon |
 | 1 | USB-C to USB-A OTG cable (male-to-female) | Connects the keyboard to the ESP32 OTG port |
-| 2 | Fine wire (~28 AWG, ~5 cm each) | 5V and GND to power the keyboard — see mod below |
 | 1 | USB-C cable | Powers the ESP32 (right/UART port) |
 | 1 | 5V USB power adapter | To power the ESP32 |
 | — | Solder + soldering iron | PCB soldering |
@@ -38,31 +37,31 @@ USB Keyboard  →  ESP32-S3 (USB OTG Host)  →  PS/2 bit-bang  →  3.5mm TRS j
 
 **Enable keyboard mode on the CW Pokemon:** Menu → tipo de electrónico → **KeyB**
 
-## Hardware modification — VBUS power for the keyboard
+## Hardware modification — enable USB Host
 
-The USB-C to USB-A OTG cable handles the data lines (D+/D−) between the ESP32-S3 OTG port and the keyboard. However, the USB keyboard also needs power (5V VBUS), which the DevKitC-1's OTG port does not supply on its own.
+The DevKitC-1 has two solder bridges on the PCB that must be closed for the left OTG port to work as a USB host and supply power to the keyboard. They are open by default. Simply apply a small drop of solder to bridge each one.
 
-The fix is to solder **2 short wires** directly on the board:
+### USB-OTG bridge (back of the board)
 
-| Pad to solder | Wire | Destination |
-|---|---|---|
-| VBUS pad of the USB-OTG connector (left) | Red (5V) | 5V pin on the DevKitC-1 header |
-| GND pad of the USB-OTG connector (left) | Black (GND) | GND pin on the DevKitC-1 header |
+Located on the back side, next to the left USB-C connector, labeled **USB-OTG**. Closing it enables VBUS (5V) output to power the keyboard.
 
-The exact pads are marked with **red circles** in the reference photos below.
+| Open — factory default | Closed — add solder |
+|:---:|:---:|
+| ![USB-OTG open](s3Pictures/photo_2026-09-26_18-58-44.jpg) | ![USB-OTG closed](s3Pictures/photo_2026-10-03_12-49-00.jpg) |
 
-The wires are secured with hot glue to prevent the solder joints from lifting when plugging/unplugging the OTG cable.
+### IN-OUT bridge (front of the board)
 
-### Hardware photos
+Located on the front side, also near the OTG connector, labeled **IN-OUT**. Closing it sets the current direction to host mode (output). The two red circles in the photo mark both bridges already closed.
 
-| File | Description |
-|---|---|
-| `s3Pictures/photo_2026-10-03_12-48-56.jpg` | **Pads marked with red circles** — exact points to solder the 2 power wires |
-| `s3Pictures/photo_2026-10-03_12-49-09.jpg` | Back view: soldered wires and hot glue over the OTG connector |
-| `s3Pictures/photo_2026-10-03_12-49-05.jpg` | Overview of the ESP32-S3 N16R8 module with both USB-C connectors |
-| `s3Pictures/photo_2026-10-03_12-49-00.jpg` | Side view with the OTG cable connected |
-| `s3Pictures/photo_2026-10-03_12-48-09.jpg` | Close-up of the USB-OTG connector with hot glue |
-| `s3Pictures/photo_2026-09-26_18-58-44.jpg` | Additional detail of the solder joints |
+| Open — factory default | Closed — add solder |
+|:---:|:---:|
+| ![IN-OUT open](s3Pictures/photo_2026-10-03_12-48-46.jpg) | ![IN-OUT closed](s3Pictures/photo_2026-10-03_12-48-56.jpg) |
+
+### General view after modification
+
+| Front side | Back side |
+|:---:|:---:|
+| ![Front view](s3Pictures/photo_2026-10-03_12-49-05.jpg) | ![Back view](s3Pictures/photo_2026-10-03_12-49-09.jpg) |
 
 ## Important electrical notes
 

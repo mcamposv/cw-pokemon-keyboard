@@ -20,7 +20,6 @@ Teclado USB  →  ESP32-S3 (USB OTG Host)  →  PS/2 bit-bang  →  Jack TRS 3.5
 | 1 | Jack TRS 3.5mm hembra estéreo (para soldar) | **Imprescindible estéreo** — ver aviso abajo |
 | 1 | Cable TRS 3.5mm estéreo (macho-macho) | Para conectar el adaptador al CW Pokemon |
 | 1 | Cable USB-C a USB-A OTG (macho-hembra) | Para conectar el teclado al puerto OTG del ESP32 |
-| 2 | Cable fino (~28 AWG, ~5 cm c/u) | 5V y GND para alimentar el teclado — ver mod abajo |
 | 1 | Cable USB-C | Alimentación del ESP32 (puerto derecho / UART) |
 | 1 | Fuente o cargador USB 5V | Para alimentar el ESP32 |
 | — | Estaño + soldador | Soldaduras en la placa |
@@ -38,31 +37,31 @@ Teclado USB  →  ESP32-S3 (USB OTG Host)  →  PS/2 bit-bang  →  Jack TRS 3.5
 
 **Activar modo teclado en el CW Pokemon:** Menú → tipo de electrónico → **KeyB**
 
-## Modificación hardware — alimentación VBUS para el teclado
+## Modificación hardware — activar USB Host
 
-El cable USB-C a USB-A OTG se encarga de las líneas de datos (D+/D−) entre el puerto OTG del ESP32-S3 y el teclado. Sin embargo, el teclado USB necesita alimentación (5V VBUS) y el puerto OTG del DevKitC-1 no la suministra por sí solo.
+El DevKitC-1 tiene dos puentes de soldadura (*solder bridges*) en la PCB que hay que cerrar para que el puerto OTG izquierdo funcione como host y suministre alimentación al teclado. De fábrica vienen abiertos. Solo hace falta aplicar una pequeña gota de estaño en cada uno.
 
-La solución es soldar **2 cables cortos** directamente en la placa:
+### Puente USB-OTG (cara trasera de la placa)
 
-| Pad a soldar | Cable | Destino |
-|---|---|---|
-| VBUS del conector USB-OTG (izquierdo) | Rojo (5V) | Pin 5V del header del DevKitC-1 |
-| GND del conector USB-OTG (izquierdo) | Negro (GND) | Pin GND del header del DevKitC-1 |
+Está en la cara trasera, junto al conector USB-C izquierdo, marcado como **USB-OTG**. Cerrarlo habilita la salida de VBUS (5V) para alimentar el teclado.
 
-Los pads exactos están marcados con **círculos rojos** en las fotos de referencia.
+| Abierto — estado de fábrica | Cerrado — aplicar estaño |
+|:---:|:---:|
+| ![USB-OTG abierto](s3Pictures/photo_2026-09-26_18-58-44.jpg) | ![USB-OTG cerrado](s3Pictures/photo_2026-10-03_12-49-00.jpg) |
 
-Los cables se sujetan con hot glue para evitar que las soldaduras cedan al conectar/desconectar el cable OTG.
+### Puente IN-OUT (cara delantera de la placa)
 
-### Fotos del hardware
+Está en la cara delantera, también cerca del conector OTG, marcado como **IN-OUT**. Cerrarlo configura la dirección de corriente en modo host (salida). Los dos círculos rojos de la foto señalan ambos puentes ya cerrados.
 
-| Archivo | Descripción |
-|---|---|
-| `s3Pictures/photo_2026-10-03_12-48-56.jpg` | **Pads marcados con círculos rojos** — puntos exactos donde soldar los 2 cables de alimentación |
-| `s3Pictures/photo_2026-10-03_12-49-09.jpg` | Vista trasera: cables soldados y hot glue sobre el conector OTG |
-| `s3Pictures/photo_2026-10-03_12-49-05.jpg` | Vista general del módulo ESP32-S3 N16R8 con ambos USB-C |
-| `s3Pictures/photo_2026-10-03_12-49-00.jpg` | Vista lateral con el cable OTG conectado |
-| `s3Pictures/photo_2026-10-03_12-48-09.jpg` | Primer plano del conector USB-OTG con hot glue |
-| `s3Pictures/photo_2026-09-26_18-58-44.jpg` | Detalle adicional de las soldaduras |
+| Abierto — estado de fábrica | Cerrado — aplicar estaño |
+|:---:|:---:|
+| ![IN-OUT abierto](s3Pictures/photo_2026-10-03_12-48-46.jpg) | ![IN-OUT cerrado](s3Pictures/photo_2026-10-03_12-48-56.jpg) |
+
+### Vista general tras la modificación
+
+| Cara delantera | Cara trasera |
+|:---:|:---:|
+| ![Vista frontal](s3Pictures/photo_2026-10-03_12-49-05.jpg) | ![Vista trasera](s3Pictures/photo_2026-10-03_12-49-09.jpg) |
 
 ## Notas eléctricas importantes
 
