@@ -76,8 +76,7 @@ Los cables se sujetan con hot glue para evitar que las soldaduras cedan al conec
 | Estado | Comportamiento LED |
 |---|---|
 | Teclado USB conectado | Apagado |
-| BLE conectado | Azul, parpadeo lento (~800 ms) |
-| Buscando / esperando | Azul, parpadeo rápido (~120 ms) |
+| Esperando teclado | Azul, parpadeo rápido (~120 ms) |
 
 ## Compilar y flashear
 
@@ -103,32 +102,17 @@ build_flags =
 ## Estructura del proyecto
 
 ```
-firmware-s3/              — Firmware principal (USB HID Host + PS/2 bit-bang + BLE)
+firmware-s3/              — Firmware (USB HID Host + PS/2 bit-bang)
 ├── platformio.ini
 └── src/
     ├── config.h          — Asignación de pines y constantes
     ├── ps2.cpp/hpp       — Driver PS/2 bit-bang (modo push-pull)
     ├── usb_kbd.cpp/hpp   — USB HID Host (ESP-IDF usb_host)
-    ├── ble_hid.cpp/hpp   — BLE HID Host (NimBLE) — en desarrollo
     ├── keymap.c/h        — Tabla HID keycode → PS/2 Set 2
     └── main.cpp
-scanner/                  — Herramienta de diagnóstico: escáner WiFi + BLE
 s3Pictures/               — Fotos del hardware y soldaduras
 debug/                    — Capturas de pantalla de depuración
 ```
-
-## Ramas del repositorio
-
-| Rama | Contenido |
-|---|---|
-| `usb-bt` | Firmware completo USB + BLE (BLE en desarrollo), herramienta de diagnóstico |
-| `only-usb` | Solo firmware USB→PS/2, sin código BLE ni herramientas extra |
-
-## Timing PS/2
-
-- Semi-período del CLK: 40 μs → ~12.5 kHz (especificación PS/2: período 60–100 μs, ≤ 16.7 kHz)
-- Verificado con osciloscopio: 928 μs para 11 bits (un byte completo)
-- El CW Pokemon resetea su máquina de estados PS/2 si hay más de ~2 ms entre flancos de CLK durante una transmisión de byte — con 40 μs estamos dentro del límite
 
 ## Licencia
 
