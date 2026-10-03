@@ -19,18 +19,12 @@ Teclado USB  →  ESP32-S3 (USB OTG Host)  →  PS/2 bit-bang  →  Jack TRS 3.5
 | 1 | ESP32-S3-DevKitC-1 N16R8 | 16 MB flash, 8 MB PSRAM |
 | 1 | Jack TRS 3.5mm hembra estéreo (para soldar) | **Imprescindible estéreo** — ver aviso abajo |
 | 1 | Cable TRS 3.5mm estéreo (macho-macho) | Para conectar el adaptador al CW Pokemon |
-| 1 | Conector USB-A hembra (para soldar) | Puerto donde se enchufa el teclado USB |
-| 4 | Cable fino (~28 AWG, ~10 cm c/u) | D+, D−, 5V, GND del USB-OTG a la USB-A hembra |
+| 1 | Cable USB-C a USB-A OTG (macho-hembra) | Para conectar el teclado al puerto OTG del ESP32 |
+| 2 | Cable fino (~28 AWG, ~5 cm c/u) | 5V y GND para alimentar el teclado — ver mod abajo |
 | 1 | Cable USB-C | Alimentación del ESP32 (puerto derecho / UART) |
 | 1 | Fuente o cargador USB 5V | Para alimentar el ESP32 |
 | — | Estaño + soldador | Soldaduras en la placa |
 | — | Pistola de hot glue | Sujetar y proteger las soldaduras |
-
-> **¿Por qué no vale un adaptador USB-C OTG estándar?**
-> El puerto USB-OTG del DevKitC-1 (conector izquierdo) **no suministra VBUS (5V)** por sí solo —
-> necesita un circuito externo (transistor PMOS) para habilitar la alimentación.
-> La modificación descrita abajo suelda los cuatro pines (D+, D−, 5V, GND) directamente
-> a los pads del conector OTG, tomando el 5V del pin de alimentación de la propia placa.
 
 > **Atención:** El jack TRS debe ser **estéreo** (3 contactos: TIP, RING, SLEEVE). Un conector mono (TS, 2 contactos) cortocircuitaría DATA con GND y podría dañar el CW Pokemon.
 
@@ -44,33 +38,31 @@ Teclado USB  →  ESP32-S3 (USB OTG Host)  →  PS/2 bit-bang  →  Jack TRS 3.5
 
 **Activar modo teclado en el CW Pokemon:** Menú → tipo de electrónico → **KeyB**
 
-## Modificación hardware — USB Host (VBUS)
+## Modificación hardware — alimentación VBUS para el teclado
 
-El conector USB-C izquierdo del DevKitC-1 (marcado como **USB-OTG**) no suministra alimentación VBUS por sí solo sin circuitería adicional (transistor PMOS). La solución es soldar 4 cables directamente a los pads del USB-OTG en la PCB:
+El cable USB-C a USB-A OTG se encarga de las líneas de datos (D+/D−) entre el puerto OTG del ESP32-S3 y el teclado. Sin embargo, el teclado USB necesita alimentación (5V VBUS) y el puerto OTG del DevKitC-1 no la suministra por sí solo.
 
-| Pad PCB (conector izquierdo) | Color cable | Destino |
+La solución es soldar **2 cables cortos** directamente en la placa:
+
+| Pad a soldar | Cable | Destino |
 |---|---|---|
-| D+ | — | GPIO20 |
-| D- | — | GPIO19 |
-| VBUS (5V) | Rojo | Pin 5V del DevKitC-1 |
-| GND | Negro/blanco | Pin GND del DevKitC-1 |
+| VBUS del conector USB-OTG (izquierdo) | Rojo (5V) | Pin 5V del header del DevKitC-1 |
+| GND del conector USB-OTG (izquierdo) | Negro (GND) | Pin GND del header del DevKitC-1 |
 
-Al otro extremo de estos 4 cables se suelda un conector USB-A hembra donde se conecta el teclado USB.
+Los pads exactos están marcados con **círculos rojos** en las fotos de referencia.
 
-Los cables se sujetan con hot glue para evitar que se despeguen los pads al mover el conector.
-
-**Ver fotos en `s3Pictures/` para detalles de las soldaduras.**
+Los cables se sujetan con hot glue para evitar que las soldaduras cedan al conectar/desconectar el cable OTG.
 
 ### Fotos del hardware
 
 | Archivo | Descripción |
 |---|---|
+| `s3Pictures/photo_2026-10-03_12-48-56.jpg` | **Pads marcados con círculos rojos** — puntos exactos donde soldar los 2 cables de alimentación |
+| `s3Pictures/photo_2026-10-03_12-49-09.jpg` | Vista trasera: cables soldados y hot glue sobre el conector OTG |
 | `s3Pictures/photo_2026-10-03_12-49-05.jpg` | Vista general del módulo ESP32-S3 N16R8 con ambos USB-C |
-| `s3Pictures/photo_2026-10-03_12-49-09.jpg` | Vista trasera: USB-OTG, cables soldados y hot glue |
-| `s3Pictures/photo_2026-10-03_12-48-46.jpg` | Placa sobre teclado, círculos rojos en los puntos de soldadura |
-| `s3Pictures/photo_2026-10-03_12-48-56.jpg` | Detalle de los cables del jack TRS (rojo/blanco) |
-| `s3Pictures/photo_2026-10-03_12-48-09.jpg` | Primer plano del conector USB-OTG con hot glue y cables |
-| `s3Pictures/photo_2026-09-26_18-58-44.jpg` | Vista adicional de las soldaduras USB-OTG |
+| `s3Pictures/photo_2026-10-03_12-49-00.jpg` | Vista lateral con el cable OTG conectado |
+| `s3Pictures/photo_2026-10-03_12-48-09.jpg` | Primer plano del conector USB-OTG con hot glue |
+| `s3Pictures/photo_2026-09-26_18-58-44.jpg` | Detalle adicional de las soldaduras |
 
 ## Notas eléctricas importantes
 
