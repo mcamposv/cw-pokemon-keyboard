@@ -1,27 +1,36 @@
 # CWPokeKey — Adaptador de teclado USB para CW Pokemon
 
-Firmware para ESP32-S3 que convierte la entrada de un teclado USB estándar al protocolo PS/2, permitiendo usarlo con el jack TRS 3.5mm del [CW Pokemon](https://www.cwpokemon.com/).
+Firmware para ESP32-S3 que convierte la entrada de un teclado USB estándar al protocolo PS/2, permitiendo usarlo con el jack TRS 3.5mm del [CW Pokemon](https://github.com/admvip/CW-Pokemon-Infomation).
 
 ## Objetivo
 
-El [CW Pokemon](https://www.cwpokemon.com/) es un dispositivo hardware para radioaficionados que decodifica y genera código Morse. Solo acepta teclados PS/2 a través de su jack TRS 3.5mm. Este adaptador soluciona esa limitación usando un ESP32-S3 como host USB HID + transmisor PS/2 por bit-bang.
+El [CW Pokemon](https://github.com/admvip/CW-Pokemon-Infomation) es un dispositivo hardware para radioaficionados que decodifica y genera código Morse (CW). Solo acepta teclados PS/2 a través de su jack TRS 3.5mm. Este adaptador soluciona esa limitación usando un ESP32-S3 como host USB HID + transmisor PS/2 por bit-bang.
 
 ```
 Teclado USB  →  ESP32-S3 (USB OTG Host)  →  PS/2 bit-bang  →  Jack TRS 3.5mm  →  CW Pokemon
 ```
 
-**Hardware y proyecto original:** [CW Pokemon](https://www.cwpokemon.com/)
+**Proyecto CW Pokemon (hardware original):** [github.com/admvip/CW-Pokemon-Infomation](https://github.com/admvip/CW-Pokemon-Infomation)
 
-## Hardware necesario
+## Lista de materiales
 
 | Cantidad | Componente | Notas |
 |---|---|---|
 | 1 | ESP32-S3-DevKitC-1 N16R8 | 16 MB flash, 8 MB PSRAM |
-| 1 | Jack TRS 3.5mm hembra estéreo para soldar | **Imprescindible estéreo** (3 contactos) |
-| 1 | Conector USB-A hembra para soldar | Para conectar el teclado USB |
-| 1 | Cable estéreo TRS 3.5mm | Para conectar al CW Pokemon |
-| 1 | Estaño + soldador | — |
-| — | Hot glue | Para sujetar los cables en la placa |
+| 1 | Jack TRS 3.5mm hembra estéreo (para soldar) | **Imprescindible estéreo** — ver aviso abajo |
+| 1 | Cable TRS 3.5mm estéreo (macho-macho) | Para conectar el adaptador al CW Pokemon |
+| 1 | Conector USB-A hembra (para soldar) | Puerto donde se enchufa el teclado USB |
+| 4 | Cable fino (~28 AWG, ~10 cm c/u) | D+, D−, 5V, GND del USB-OTG a la USB-A hembra |
+| 1 | Cable USB-C | Alimentación del ESP32 (puerto derecho / UART) |
+| 1 | Fuente o cargador USB 5V | Para alimentar el ESP32 |
+| — | Estaño + soldador | Soldaduras en la placa |
+| — | Pistola de hot glue | Sujetar y proteger las soldaduras |
+
+> **¿Por qué no vale un adaptador USB-C OTG estándar?**
+> El puerto USB-OTG del DevKitC-1 (conector izquierdo) **no suministra VBUS (5V)** por sí solo —
+> necesita un circuito externo (transistor PMOS) para habilitar la alimentación.
+> La modificación descrita abajo suelda los cuatro pines (D+, D−, 5V, GND) directamente
+> a los pads del conector OTG, tomando el 5V del pin de alimentación de la propia placa.
 
 > **Atención:** El jack TRS debe ser **estéreo** (3 contactos: TIP, RING, SLEEVE). Un conector mono (TS, 2 contactos) cortocircuitaría DATA con GND y podría dañar el CW Pokemon.
 

@@ -1,27 +1,36 @@
 # CWPokeKey — USB keyboard adapter for CW Pokemon
 
-Firmware for ESP32-S3 that converts input from a standard wired USB keyboard to PS/2 protocol, enabling its use with the 3.5mm TRS PS/2 jack of the [CW Pokemon](https://www.cwpokemon.com/).
+Firmware for ESP32-S3 that converts input from a standard wired USB keyboard to PS/2 protocol, enabling its use with the 3.5mm TRS PS/2 jack of the [CW Pokemon](https://github.com/admvip/CW-Pokemon-Infomation).
 
 ## Goal
 
-The [CW Pokemon](https://www.cwpokemon.com/) is a hardware device for amateur radio operators that decodes and generates Morse code (CW). It only accepts PS/2 keyboards through its 3.5mm TRS jack. This adapter bridges that gap using an ESP32-S3 as USB HID host and PS/2 bit-bang transmitter.
+The [CW Pokemon](https://github.com/admvip/CW-Pokemon-Infomation) is a hardware device for amateur radio operators that decodes and generates Morse code (CW). It only accepts PS/2 keyboards through its 3.5mm TRS jack. This adapter bridges that gap using an ESP32-S3 as USB HID host and PS/2 bit-bang transmitter.
 
 ```
 USB Keyboard  →  ESP32-S3 (USB OTG Host)  →  PS/2 bit-bang  →  3.5mm TRS jack  →  CW Pokemon
 ```
 
-**Original hardware project:** [CW Pokemon](https://www.cwpokemon.com/)
+**CW Pokemon project (original hardware):** [github.com/admvip/CW-Pokemon-Infomation](https://github.com/admvip/CW-Pokemon-Infomation)
 
-## Required hardware
+## Bill of materials
 
 | Qty | Component | Notes |
 |---|---|---|
 | 1 | ESP32-S3-DevKitC-1 N16R8 | 16 MB flash, 8 MB PSRAM |
-| 1 | Female stereo TRS 3.5mm pigtail | **Must be stereo** (3 contacts) |
-| 1 | Female USB-A connector for soldering | To plug in the USB keyboard |
-| 1 | Stereo TRS 3.5mm cable | To connect to the CW Pokemon |
-| 1 | Solder + soldering iron | — |
-| — | Hot glue | To secure wires on the PCB |
+| 1 | Female stereo TRS 3.5mm pigtail (for soldering) | **Must be stereo** — see warning below |
+| 1 | Stereo TRS 3.5mm cable (male-to-male) | Connects the adapter to the CW Pokemon |
+| 1 | Female USB-A connector (for soldering) | Port where the USB keyboard plugs in |
+| 4 | Fine wire (~28 AWG, ~10 cm each) | D+, D−, 5V, GND from USB-OTG to USB-A female |
+| 1 | USB-C cable | Powers the ESP32 (right/UART port) |
+| 1 | 5V USB power adapter | To power the ESP32 |
+| — | Solder + soldering iron | PCB soldering |
+| — | Hot glue gun | Secure and protect solder joints |
+
+> **Why won't a standard USB-C OTG adapter work?**
+> The DevKitC-1's USB-OTG port (left connector) **does not supply VBUS (5V)** on its own —
+> it requires external circuitry (a PMOS transistor) to enable power output.
+> The hardware modification described below solders all four lines (D+, D−, 5V, GND) directly
+> onto the OTG connector pads, drawing 5V from the board's own power pin.
 
 > **Warning:** The TRS jack must be **stereo** (3 contacts: TIP, RING, SLEEVE). A mono (TS, 2-contact) connector would short DATA to GND and could damage the CW Pokemon.
 
