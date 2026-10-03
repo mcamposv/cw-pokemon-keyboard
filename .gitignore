@@ -13,6 +13,10 @@
 # qFlipper tool (3rd party binary, not our project)
 squashfs-root/
 
+# Slicer output (específico de cada impresora, no se versiona)
+*.gcode
+*.3mf
+
 # OS files
 .DS_Store
 Thumbs.db

@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include "config.h"
+#include "version.h"
 #include "ps2.hpp"
 #include "ble_hid.hpp"
 #include "usb_kbd.hpp"
@@ -41,8 +42,8 @@ void setup() {
 
     Serial.begin(115200);
     delay(500);
-    Serial.println("\n=== CWPokeKey v1.0 ===");
-    Serial.println("BLE HID → PS/2 adapter for CW Pokemon");
+    Serial.println("\n=== CWPokeKey v" FIRMWARE_VERSION " ===");
+    Serial.println("USB+BLE HID → PS/2 adapter for CW Pokemon");
 
     ps2_init();
     usb_kbd_init();

@@ -1,0 +1,72 @@
+name: Build & Release
+
+# Dispara solo en tags con formato vX.Y.Z
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+
+permissions:
+  contents: write   # necesario para crear el Release
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Extrae "1.0.0" del tag "v1.0.0"
+      - name: Extract version
+        id: version
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_OUTPUT
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # Caché de la toolchain de PlatformIO (~200 MB)
+      - name: Cache PlatformIO
+        uses: actions/cache@v4
+        with:
+          path: ~/.platformio/.cache
+          key: ${{ runner.os }}-pio-${{ hashFiles('firmware-s3/platformio.ini') }}
+          restore-keys: ${{ runner.os }}-pio-
+
+      - name: Install PlatformIO
+        run: pip install platformio
+
+      # Sobreescribe version.h con la versión del tag antes de compilar
+      - name: Stamp version
+        run: |
+          printf '#pragma once\n#define FIRMWARE_VERSION "%s"\n' \
+            "${{ steps.version.outputs.VERSION }}" \
+            > firmware-s3/src/version.h
+
+      - name: Build firmware
+        working-directory: firmware-s3
+        run: pio run
+
+      # Renombra el binario con la versión para que sea identificable
+      - name: Rename binary
+        run: |
+          cp firmware-s3/.pio/build/esp32-s3-devkitc-1/firmware.bin \
+             cwpokekey-v${{ steps.version.outputs.VERSION }}.bin
+
+      # Crea el Release en GitHub y adjunta el .bin
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: CWPokeKey v${{ steps.version.outputs.VERSION }}
+          files: cwpokekey-v${{ steps.version.outputs.VERSION }}.bin
+          generate_release_notes: true
+          body: |
+            ## Flashear
+
+            Requiere [esptool](https://github.com/espressif/esptool) o el [ESP32 Flash Download Tool](https://www.espressif.com/en/support/download/other-tools).
+
+            ```bash
+            esptool.py --chip esp32s3 --port /dev/ttyACM0 write_flash 0x0 cwpokekey-v${{ steps.version.outputs.VERSION }}.bin
+            ```
+
+            Consulta el [README](README.md) para instrucciones completas de hardware.
