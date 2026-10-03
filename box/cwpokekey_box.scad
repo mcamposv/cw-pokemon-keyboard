@@ -54,18 +54,17 @@ USB_W  = 9.5;   // ancho de cada apertura
 USB_H  = 4.0;   // alto de cada apertura
 USB_CC = 16.0;  // distancia centro a centro entre los dos conectores
 USB_Z  =  2.0;  // altura del centro del conector sobre el fondo de la placa
+USB_WL = WL * 0.5;  // grosor de pared en la zona USB (50% de WL)
 
 // ── RANURA JACK TRS (pared X=OL, forma U abierta arriba) ─────────────────────
 
-JACK_R = 2.5;   // radio ranura: cable 4 mm + 0.5 mm holgura
+JACK_R     = 2.0;   // radio ranura → ancho total 4 mm
+JACK_DEPTH = 6.0;   // profundidad del canal desde el borde superior (mm)
 
-// ── CLIPS DE CIERRE ──────────────────────────────────────────────────────────
-// 2 clips en la pared Y=0, 2 en la pared Y=OW (lados largos)
+// ── TAPA — labio de ajuste ────────────────────────────────────────────────────
 
-CLIP_W  = 10;   // ancho del clip
 LIP_D   =  4;   // profundidad del labio de la tapa
 LIP_GAP = 0.3;  // holgura labio ↔ exterior de caja
-SNAP_D  = 0.8;  // profundidad del resalte de enganche
 
 // ── TAPA ─────────────────────────────────────────────────────────────────────
 
@@ -77,8 +76,6 @@ LIP_WL  = 1.8;  // grosor del labio de la tapa
 // Centro absoluto (Z) del conector USB desde el exterior del suelo
 usb_z_abs = WL + FLOOR + USB_Z;
 
-// X de los dos clips por cara larga (en OL*0.25 y OL*0.75)
-clip_x = [OL*0.25, OL*0.75];
 
 // ─────────────────────────────────────────────────────────────────────────────
 // MÓDULOS
@@ -88,12 +85,17 @@ clip_x = [OL*0.25, OL*0.75];
 // Se usa para el hueco del jack en el cuerpo y en la tapa.
 // Orientación: la apertura queda en +Z (hacia arriba).
 // La geometría se extrude en el eje Y (rotation -90° para cortar pared en X).
-module u_slot_xz(r, thick) {
-    // Llamada: translate al centro, rotate para orientar, luego extruye en Y
+// U vertical: apertura en el borde superior (módulo X=0 → mundo Z=OH),
+// paredes rectas hasta depth-r, semicírculo en el fondo.
+// Ancho total = 2*r  |  Profundidad total = depth
+module u_slot_xz(r, thick, depth=0) {
+    d = max(r * 2, depth);   // mínimo suficiente para que el semicírculo quepa
     linear_extrude(thick + 0.2)
         union() {
-            circle(r = r);
-            translate([-r, -r]) square([r*2, r + 0.1]);
+            // Canal recto: desde la apertura hasta el inicio del semicírculo
+            translate([0, -r]) square([d - r, r * 2]);
+            // Semicírculo en el fondo
+            translate([d - r, 0]) circle(r = r);
         }
 }
 
@@ -110,33 +112,31 @@ module box_body() {
         translate([WL, WL, WL])
             cube([IL, IW, IH + 1]);
 
-        // ── Aperturas USB-C (pared X=0) ──────────────────────────────────
-        for (yc = [OW/2 - USB_CC/2, OW/2 + USB_CC/2])
-            translate([-0.1, yc - USB_W/2, usb_z_abs - USB_H/2])
-                cube([WL + 0.2, USB_W, USB_H]);
+        // ── Apertura USB-C (pared X=0) — hueco continuo para ambos puertos ─────
+        translate([-0.1, OW/2 - USB_CC/2 - USB_W/2, usb_z_abs - USB_H/2])
+            cube([WL + 0.2, USB_CC + USB_W, USB_H]);
+
+        // Rebaje exterior que deja la pared USB con grosor USB_WL (50% de WL)
+        translate([-0.1, OW/2 - USB_CC/2 - USB_W/2 - 2, usb_z_abs - USB_H/2 - 2])
+            cube([WL - USB_WL + 0.1, USB_CC + USB_W + 4, USB_H + 4]);
 
         // ── Ranura U jack TRS (pared X=OL) ───────────────────────────────
-        // El semicírculo queda centrado en Y=OW/2, Z=OH (borde superior)
-        translate([OL - WL - 0.1, OW/2, OH])
-            rotate([0, 90, 0])                // extruye en +X (atraviesa la pared)
-                u_slot_xz(JACK_R, WL);
+        // Ranura U: +0.1 sobre OH para evitar cara coplanar en el borde superior
+        translate([OL - WL - 0.1, OW/2, OH + 0.1])
+            rotate([0, 90, 0])
+                u_slot_xz(JACK_R, WL, depth=JACK_DEPTH + 0.1);
 
-        // ── Muescas para clips (pared Y=0 y Y=OW) ────────────────────────
-        for (cx = clip_x) {
-            // Pared Y=0
-            translate([cx - CLIP_W/2, -0.1, OH - LIP_D])
-                cube([CLIP_W, SNAP_D + 0.1, LIP_D + 0.1]);
-            // Pared Y=OW
-            translate([cx - CLIP_W/2, OW - SNAP_D, OH - LIP_D])
-                cube([CLIP_W, SNAP_D + 0.1, LIP_D + 0.1]);
-        }
     }
 
-    // Topes de esquina: elevan la placa FLOOR mm del suelo
-    for (x = [WL + 1, OL - WL - 5])
-        for (y = [WL + 1, OW - WL - 5])
-            translate([x, y, WL])
-                cube([4, 4, FLOOR]);
+    // Topes esquina lado USB (solo soporte de altura, FLOOR mm)
+    for (y = [WL + 1, OW - WL - 5])
+        translate([WL + 1, y, WL])
+            cube([4, 4, FLOOR]);
+
+    // Topes esquina lado jack/antena (7×4×4 mm, encajan la placa lateralmente)
+    for (y = [WL, OW - WL - 4])
+        translate([OL - WL - 7, y, WL])
+            cube([7, 4, 4]);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -171,25 +171,8 @@ module lid() {
                 }
         }
 
-        // ── Ranura U en el labio (lado jack, X=OL) ───────────────────────
-        // La ranura debe alinearse con la del cuerpo:
-        // centro en Y=OW/2, parte inferior en Z=LID_T+(LIP_D-JACK_R) para
-        // que el semicírculo quede a la misma cota que en el cuerpo.
-        translate([OL + LIP_GAP + LIP_WL + 0.1, OW/2, LID_T + LIP_D])
-            rotate([0, -90, 0])                // extruye en -X
-                u_slot_xz(JACK_R, LIP_WL + LIP_GAP);
     }
 
-    // ── Resaltes de enganche en el interior del labio (lados largos Y) ───
-    for (cx = clip_x) {
-        // Lado Y=0: resalte en cara interior Y+ del labio
-        translate([cx - CLIP_W/2, lx + LIP_WL, LID_T])
-            snap_bump();
-        // Lado Y=OW: resalte en cara interior Y- del labio
-        translate([cx - CLIP_W/2, OW + LIP_GAP, LID_T])
-            mirror([0, 1, 0])
-                snap_bump();
-    }
 }
 
 // Resalte triangular — engancha en la muesca del cuerpo

@@ -100,6 +100,10 @@ build_flags =
 ;   -DLAYOUT_US   ; QWERTY inglés americano
 ```
 
+## Caja imprimible en 3D
+
+En la carpeta `box/` hay una caja parametrizada en OpenSCAD para alojar el adaptador. Los STL están listos para slicear directamente.
+
 ## Estructura del proyecto
 
 ```
@@ -111,6 +115,10 @@ firmware-s3/              — Firmware (USB HID Host + PS/2 bit-bang)
     ├── usb_kbd.cpp/hpp   — USB HID Host (ESP-IDF usb_host)
     ├── keymap.c/h        — Tabla HID keycode → PS/2 Set 2
     └── main.cpp
+box/                      — Caja imprimible en 3D
+├── cwpokekey_box.scad    — Fuente OpenSCAD (paramétrica)
+├── cwpokekey_body.stl    — Cuerpo (imprimir sin soportes, suelo abajo)
+└── cwpokekey_lid.stl     — Tapa  (imprimir sin soportes, cara exterior abajo)
 s3Pictures/               — Fotos del hardware y soldaduras
 debug/                    — Capturas de pantalla de depuración
 ```

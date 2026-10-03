@@ -100,6 +100,10 @@ build_flags =
 ;   -DLAYOUT_US   ; US QWERTY
 ```
 
+## 3D printable enclosure
+
+The `box/` folder contains a parametric OpenSCAD enclosure for the adapter. The STL files are ready to slice directly.
+
 ## Project structure
 
 ```
@@ -111,6 +115,10 @@ firmware-s3/              — Firmware (USB HID Host + PS/2 bit-bang)
     ├── usb_kbd.cpp/hpp   — USB HID Host (ESP-IDF usb_host)
     ├── keymap.c/h        — HID keycode → PS/2 Set 2 scancode table
     └── main.cpp
+box/                      — 3D printable enclosure
+├── cwpokekey_box.scad    — OpenSCAD source (parametric)
+├── cwpokekey_body.stl    — Body  (no supports, floor down)
+└── cwpokekey_lid.stl     — Lid   (no supports, exterior face down)
 s3Pictures/               — Hardware and soldering photos
 debug/                    — Debug screenshots
 ```
