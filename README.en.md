@@ -19,18 +19,12 @@ USB Keyboard  →  ESP32-S3 (USB OTG Host)  →  PS/2 bit-bang  →  3.5mm TRS j
 | 1 | ESP32-S3-DevKitC-1 N16R8 | 16 MB flash, 8 MB PSRAM |
 | 1 | Female stereo TRS 3.5mm pigtail (for soldering) | **Must be stereo** — see warning below |
 | 1 | Stereo TRS 3.5mm cable (male-to-male) | Connects the adapter to the CW Pokemon |
-| 1 | Female USB-A connector (for soldering) | Port where the USB keyboard plugs in |
-| 4 | Fine wire (~28 AWG, ~10 cm each) | D+, D−, 5V, GND from USB-OTG to USB-A female |
+| 1 | USB-C to USB-A OTG cable (male-to-female) | Connects the keyboard to the ESP32 OTG port |
+| 2 | Fine wire (~28 AWG, ~5 cm each) | 5V and GND to power the keyboard — see mod below |
 | 1 | USB-C cable | Powers the ESP32 (right/UART port) |
 | 1 | 5V USB power adapter | To power the ESP32 |
 | — | Solder + soldering iron | PCB soldering |
 | — | Hot glue gun | Secure and protect solder joints |
-
-> **Why won't a standard USB-C OTG adapter work?**
-> The DevKitC-1's USB-OTG port (left connector) **does not supply VBUS (5V)** on its own —
-> it requires external circuitry (a PMOS transistor) to enable power output.
-> The hardware modification described below solders all four lines (D+, D−, 5V, GND) directly
-> onto the OTG connector pads, drawing 5V from the board's own power pin.
 
 > **Warning:** The TRS jack must be **stereo** (3 contacts: TIP, RING, SLEEVE). A mono (TS, 2-contact) connector would short DATA to GND and could damage the CW Pokemon.
 
@@ -44,33 +38,31 @@ USB Keyboard  →  ESP32-S3 (USB OTG Host)  →  PS/2 bit-bang  →  3.5mm TRS j
 
 **Enable keyboard mode on the CW Pokemon:** Menu → tipo de electrónico → **KeyB**
 
-## Hardware modification — USB Host (VBUS power)
+## Hardware modification — VBUS power for the keyboard
 
-The left USB-C connector on the DevKitC-1 (labeled **USB-OTG**) does not supply VBUS power on its own without additional circuitry (PMOS transistor). The solution is to solder 4 wires directly onto the USB-OTG pads on the PCB:
+The USB-C to USB-A OTG cable handles the data lines (D+/D−) between the ESP32-S3 OTG port and the keyboard. However, the USB keyboard also needs power (5V VBUS), which the DevKitC-1's OTG port does not supply on its own.
 
-| PCB pad (left connector) | Wire color | Destination |
+The fix is to solder **2 short wires** directly on the board:
+
+| Pad to solder | Wire | Destination |
 |---|---|---|
-| D+ | — | GPIO20 |
-| D- | — | GPIO19 |
-| VBUS (5V) | Red | 5V pin on DevKitC-1 |
-| GND | Black/white | GND pin on DevKitC-1 |
+| VBUS pad of the USB-OTG connector (left) | Red (5V) | 5V pin on the DevKitC-1 header |
+| GND pad of the USB-OTG connector (left) | Black (GND) | GND pin on the DevKitC-1 header |
 
-A female USB-A connector is soldered to the other end of these 4 wires, where the USB keyboard plugs in.
+The exact pads are marked with **red circles** in the reference photos below.
 
-The wires are secured with hot glue to prevent the pads from lifting when the connector is moved.
-
-**See photos in `s3Pictures/` for soldering details.**
+The wires are secured with hot glue to prevent the solder joints from lifting when plugging/unplugging the OTG cable.
 
 ### Hardware photos
 
 | File | Description |
 |---|---|
+| `s3Pictures/photo_2026-10-03_12-48-56.jpg` | **Pads marked with red circles** — exact points to solder the 2 power wires |
+| `s3Pictures/photo_2026-10-03_12-49-09.jpg` | Back view: soldered wires and hot glue over the OTG connector |
 | `s3Pictures/photo_2026-10-03_12-49-05.jpg` | Overview of the ESP32-S3 N16R8 module with both USB-C connectors |
-| `s3Pictures/photo_2026-10-03_12-49-09.jpg` | Back view: USB-OTG connector, soldered wires and hot glue blobs |
-| `s3Pictures/photo_2026-10-03_12-48-46.jpg` | Board on keyboard, red circles marking solder points |
-| `s3Pictures/photo_2026-10-03_12-48-56.jpg` | Detail of TRS jack wires (red/white) |
-| `s3Pictures/photo_2026-10-03_12-48-09.jpg` | Close-up of USB-OTG connector with hot glue and wires |
-| `s3Pictures/photo_2026-09-26_18-58-44.jpg` | Additional view of the USB-OTG solder points |
+| `s3Pictures/photo_2026-10-03_12-49-00.jpg` | Side view with the OTG cable connected |
+| `s3Pictures/photo_2026-10-03_12-48-09.jpg` | Close-up of the USB-OTG connector with hot glue |
+| `s3Pictures/photo_2026-09-26_18-58-44.jpg` | Additional detail of the solder joints |
 
 ## Important electrical notes
 
