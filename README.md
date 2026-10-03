@@ -1,5 +1,7 @@
 # CWPokeKey — Adaptador de teclado USB para CW Pokemon
 
+> [English version](README.en.md)
+
 Firmware para ESP32-S3 que convierte la entrada de un teclado USB estándar al protocolo PS/2, permitiendo usarlo con el jack TRS 3.5mm del [CW Pokemon](https://github.com/admvip/CW-Pokemon-Infomation).
 
 ## Objetivo
